@@ -120,6 +120,7 @@ class Flexmail_Integration_Action_After_Submit extends \ElementorPro\Modules\For
 			[
 				'label' => __( 'Language', 'flexmail-elementor-integration' ),
 				'type' => \Elementor\Controls_Manager::SELECT,
+				'separator' => 'before',
 				'default' => 'nl',
 				'options' => [
 					'nl'  => esc_html__( 'NL', 'flexmail-elementor-integration' ),
@@ -173,7 +174,6 @@ class Flexmail_Integration_Action_After_Submit extends \ElementorPro\Modules\For
 				'label' => __( 'Email Field ID', 'flexmail-elementor-integration' ),
 				'type' => \Elementor\Controls_Manager::TEXT,
 				'placeholder' => 'email',
-				'separator' => 'before',
 				'description' => __( 'Enter the email field id - you can find this under the email field advanced tab', 'flexmail-elementor-integration' ),
 				'dynamic' => [
 					'active' => true,
