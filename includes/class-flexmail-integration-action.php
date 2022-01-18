@@ -5,6 +5,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; 
 }
 
+function get_string_between($string, $start, $end){
+    $string = ' ' . $string;
+    $ini = strpos($string, $start);
+    if ($ini == 0) return '';
+    $ini += strlen($start);
+    $len = strpos($string, $end, $ini) - $ini;
+    return substr($string, $ini, $len);
+}
+
 class Flexmail_Integration_Action_After_Submit extends \ElementorPro\Modules\Forms\Classes\Action_Base {
 
 	/**
@@ -81,10 +90,25 @@ class Flexmail_Integration_Action_After_Submit extends \ElementorPro\Modules\For
 		);
 
 		$widget->add_control(
+			'flexmail_source_id',
+			[
+				'label' => __( 'Flexmail source ID', 'flexmail-elementor-integration' ),
+				'type' => \Elementor\Controls_Manager::TEXT,
+				'placeholder' => ' 4927...',
+				'label_block' => true,
+				'separator' => 'before',
+				'description' => __( 'Enter your source ID. you can ask this from Flexmail support', 'flexmail-elementor-integration' ),
+				'dynamic' => [
+					'active' => true,
+				],
+			]
+		);
+
+		$widget->add_control(
 			'api_help_note',
 			[
 				'type' => \Elementor\Controls_Manager::RAW_HTML,
-				'raw' => __('Note that you will have to contact Flexmail support in order to recieve a API username and key.', 'flexmail-elementor-integration'),
+				'raw' => __('Note that you will have to contact Flexmail support in order to recieve a API username, key and source ID.', 'flexmail-elementor-integration'),
 			]
 		);
 
@@ -121,6 +145,7 @@ class Flexmail_Integration_Action_After_Submit extends \ElementorPro\Modules\For
 				'label' => __( 'Language', 'flexmail-elementor-integration' ),
 				'type' => \Elementor\Controls_Manager::SELECT,
 				'separator' => 'before',
+				'description' => 'The languages that you can give to your contact are the languages that you had to choose during onboarding. If you want to add or remove a language afterwards, you can contact flexmail only the languages you have will work',
 				'default' => 'nl',
 				'options' => [
 					'nl'  => esc_html__( 'NL', 'flexmail-elementor-integration' ),
@@ -182,12 +207,23 @@ class Flexmail_Integration_Action_After_Submit extends \ElementorPro\Modules\For
 		);
 
 		$widget->add_control(
+			'flexmail_send_first_last_name',
+			[
+				'label' => __( 'Send first and last name', 'flexmail-elementor-integration' ),
+				'type' => \Elementor\Controls_Manager::SWITCHER
+			]
+		);
+
+		$widget->add_control(
 			'flexmail_name_field',
 			[
-				'label' => __( 'Name Field ID (Optional)', 'flexmail-elementor-integration' ),
+				'label' => __( 'Name Field ID', 'flexmail-elementor-integration' ),
 				'type' => \Elementor\Controls_Manager::TEXT,
 				'placeholder' => 'name',
 				'description' => __( 'Enter the name field id - you can find this under the name field advanced tab', 'flexmail-elementor-integration' ),
+    			'condition' => array(
+    				'flexmail_send_first_last_name' => 'yes',
+    			),
 				'dynamic' => [
 					'active' => true,
 				],
@@ -197,21 +233,16 @@ class Flexmail_Integration_Action_After_Submit extends \ElementorPro\Modules\For
 		$widget->add_control(
 			'flexmail_last_name_field',
 			[
-				'label' => __( 'Lastname Field ID (Optional)', 'flexmail-elementor-integration' ),
+				'label' => __( 'Lastname Field ID', 'flexmail-elementor-integration' ),
 				'type' => \Elementor\Controls_Manager::TEXT,
 				'placeholder' => 'lastname',
 				'description' => __( 'Enter the lastname field id - you can find this under the lastname field advanced tab', 'flexmail-elementor-integration' ),
+    			'condition' => array(
+    				'flexmail_send_first_last_name' => 'yes',
+    			),
 				'dynamic' => [
 					'active' => true,
 				],
-			]
-		);
-
-		$widget->add_control(
-			'pro_version_note',
-			[
-				'type' => \Elementor\Controls_Manager::RAW_HTML,
-				'raw' => __('Need custom fields? <a href="https://plugins.webtica.be/product/flexmail-pro-integration-for-elementor-forms/?ref=plugin-widget" target="_blank">Check out our Pro version.</a>', 'flexmail-elementor-integration'),
 			]
 		);
 
@@ -238,10 +269,12 @@ class Flexmail_Integration_Action_After_Submit extends \ElementorPro\Modules\For
 		unset(
 			$element['flexmail_username'],
 			$element['flexmail_api'],
+			$element['flexmail_source_id'],
 			$element['flexmail_language'],
 			$element['flexmail_gdpr_checkbox'],
 			$element['flexmail_gdpr_checkbox_field'],
 			$element['flexmail_email_field'],
+			$element['flexmail_send_first_last_name'],
 			$element['flexmail_name_field'],
 			$element['flexmail_last_name_field']
 		);
@@ -268,6 +301,11 @@ class Flexmail_Integration_Action_After_Submit extends \ElementorPro\Modules\For
 
 		//  Make sure that there is an Flexmail API key set
 		if ( empty( $settings['flexmail_api'] ) ) {
+			return;
+		}
+		
+		//  Make sure that there is an Flexmail source ID set
+		if ( empty( $settings['flexmail_source_id'] ) ) {
 			return;
 		}
 
@@ -303,20 +341,36 @@ class Flexmail_Integration_Action_After_Submit extends \ElementorPro\Modules\For
 				return;
 			}
 		}
-		
+
+		//check to send first and last name 
+		$firstlastnamecheck = $settings['flexmail_send_first_last_name'];
+		if ($firstlastnamecheck == "yes") {
+			//  Make sure that there is a firstname field if switch is set
+			if ( empty( $settings['flexmail_name_field'] ) ) {
+				return;
+			}
+			//  Make sure that there is a lastname field if switch is set
+			if ( empty( $settings['flexmail_last_name_field'] ) ) {
+				return;
+			}
+			$datatosend = json_encode(["email" => $fields[$settings['flexmail_email_field']], "first_name" => $fields[$settings['flexmail_name_field']], "name" => $fields[$settings['flexmail_last_name_field']], "language" => $settings['flexmail_language'], "source" => (int)$settings['flexmail_source_id']]);
+		}
+		else {
+			$datatosend = json_encode(["email" => $fields[$settings['flexmail_email_field']], "language" => $settings['flexmail_language'], "source" => (int)$settings['flexmail_source_id']]);
+		}
 		
 		//Send data to Flexmail
-		wp_remote_post( 'https://api.flexmail.com/v3/contacts', array(
+		wp_remote_post( 'https://api.flexmail.eu/contacts', array(
 			'method'      => 'POST',
 		    'timeout'     => 45,
 		    'httpversion' => '1.0',
 		    'blocking'    => false,
 		    'headers'     => [
 	            'accept' => 'application/json',
-	            'api-key' => $settings['flexmail_api'],
 		    	'content-Type' => 'application/json',
+	            'Authorization' => 'Basic ' . base64_encode( $settings['flexmail_username'] . ':' . $settings['flexmail_api'] ),
 		    ],
-		    'body'        => json_encode(["attributes" => [ $flexmailattributename => $fields[$settings['flexmail_name_field']], $flexmailattributelastname => $fields[$settings['flexmail_last_name_field']] ], "updateEnabled" => true, "listIds" => [(int)$settings['flexmail_list']], "email" => $fields[$settings['flexmail_email_field']]])
+		    'body'        => $datatosend
 			)
 		);	
 
