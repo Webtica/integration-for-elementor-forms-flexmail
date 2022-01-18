@@ -5,15 +5,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; 
 }
 
-function get_string_between($string, $start, $end){
-    $string = ' ' . $string;
-    $ini = strpos($string, $start);
-    if ($ini == 0) return '';
-    $ini += strlen($start);
-    $len = strpos($string, $end, $ini) - $ini;
-    return substr($string, $ini, $len);
-}
-
 class Flexmail_Integration_Action_After_Submit extends \ElementorPro\Modules\Forms\Classes\Action_Base {
 
 	/**
