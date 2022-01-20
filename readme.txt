@@ -1,10 +1,10 @@
 === Integration for Elementor forms - Flexmail ===
 Contributors: webtica
-Tags: sendinblue, elementor, elementor pro, forms, integration, marketing, lists, send, blue, automation
+Tags: sendinblue, elementor, elementor pro, forms, integration, marketing, lists, flexmail, flex, mail, segments, automation
 Requires at least: 5.0
 Tested up to: 5.8.2
 Requires PHP: 5.4
-Stable tag: 1.3.1
+Stable tag: 1.0.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -51,5 +51,5 @@ Yes, all the other form widget integrations will be available.
 
 == Changelog ==
 
-= 1.0.0 - 2022-01-18 =
+= 1.0.0 - 2022-01-20 =
 * Initial Release

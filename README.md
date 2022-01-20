@@ -43,5 +43,5 @@ Yes, all the other form widget integrations will be available.
 
 ## Changelog
 
-### 1.0.0 - 18-01-2022
+### 1.0.0 - 20-01-2022
 * Initial Release
