@@ -2,9 +2,9 @@
 Contributors: webtica
 Tags: sendinblue, elementor, elementor pro, forms, integration, marketing, lists, flexmail, flex, mail, segments, automation
 Requires at least: 5.0
-Tested up to: 5.8.2
+Tested up to: 5.9
 Requires PHP: 5.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -50,6 +50,10 @@ Because this integration works with the Form Widget, which is a Elementor Pro un
 Yes, all the other form widget integrations will be available.
 
 == Changelog ==
+
+= 1.0.1 - 2022-01-24 =
+* Tested Elementor up to 3.5.4
+* Tested WordPress up to 5.9
 
 = 1.0.0 - 2022-01-20 =
 * Initial Release
